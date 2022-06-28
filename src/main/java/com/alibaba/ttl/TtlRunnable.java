@@ -54,10 +54,12 @@ public final class TtlRunnable implements Runnable, TtlWrapper<Runnable>, TtlEnh
             throw new IllegalStateException("TTL value reference is released after run!");
         }
 
+        //重放
         final Object backup = replay(captured);
         try {
             runnable.run();
         } finally {
+            //还原
             restore(backup);
         }
     }

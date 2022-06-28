@@ -287,9 +287,11 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
     public final void set(T value) {
         if (!disableIgnoreNullValueSemantics && null == value) {
             // may set null to remove value
+            //设置null值去删除
             remove();
         } else {
             super.set(value);
+            //添加 value 到 holder
             addThisToHolder();
         }
     }
@@ -317,6 +319,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
     //    2.1 but the WeakHashMap is used as a *Set*:
     //        the value of WeakHashMap is *always* null, and never used.
     //    2.2 WeakHashMap support *null* value.
+    //   WeakHashMap 当作一个value为null值的集合使用
     private static final InheritableThreadLocal<WeakHashMap<TransmittableThreadLocal<Object>, ?>> holder =
             new InheritableThreadLocal<WeakHashMap<TransmittableThreadLocal<Object>, ?>>() {
                 @Override
@@ -398,6 +401,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
      * <pre>{@code
      * ///////////////////////////////////////////////////////////////////////////
      * // in thread A, capture all TransmittableThreadLocal values of thread A
+     *  抓取线程A的所有副本值
      * ///////////////////////////////////////////////////////////////////////////
      *
      * Object captured = Transmitter.capture(); // (1)
@@ -407,14 +411,17 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
      * ///////////////////////////////////////////////////////////////////////////
      *
      * // replay all TransmittableThreadLocal values from thread A
+     *   重放线程A的所有副本值，备份
      * Object backup = Transmitter.replay(captured); // (2)
      * try {
      *     // your biz logic, run with the TransmittableThreadLocal values of thread B
+     *     执行线程B的副本值的业务逻辑代码
      *     System.out.println("Hello");
      *     // ...
      *     return "World";
      * } finally {
      *     // restore the TransmittableThreadLocal of thread B when replay
+     *      还原线程A的副本
      *     Transmitter.restore(backup); // (3)
      * }}</pre>
      * <p>
@@ -489,6 +496,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
          */
         @NonNull
         public static Object capture() {
+            //抓取值时，创建快照
             return new Snapshot(captureTtlValues(), captureThreadLocalValues());
         }
 
@@ -514,6 +522,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
         /**
          * Replay the captured {@link TransmittableThreadLocal} and registered {@link ThreadLocal} values from {@link #capture()},
          * and return the backup {@link TransmittableThreadLocal} values in the current thread before replay.
+         * 重放所有副本值之前需要备份
          *
          * @param captured captured {@link TransmittableThreadLocal} values from other thread from {@link #capture()}
          * @return the backup {@link TransmittableThreadLocal} values before replay
@@ -538,6 +547,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
 
                 // clear the TTL values that is not in captured
                 // avoid the extra TTL values after replay when run task
+                //清理抓取时不存在的值，避免运行任务时重播后的额外TTL值
                 if (!captured.containsKey(threadLocal)) {
                     iterator.remove();
                     threadLocal.superRemove();
@@ -545,6 +555,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
             }
 
             // set TTL values to captured
+            //将另一个线程的副本值，设置到当前线程
             setTtlValuesTo(captured);
 
             // call beforeExecute callback
@@ -619,6 +630,7 @@ public class TransmittableThreadLocal<T> extends InheritableThreadLocal<T> imple
             }
 
             // restore TTL values
+            //将上一个线程的副本值归还到上一个线程
             setTtlValuesTo(backup);
         }
 
