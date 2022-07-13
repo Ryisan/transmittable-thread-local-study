@@ -100,7 +100,7 @@
 
 		<kotlin.version>1.7.0</kotlin.version>
 		<kotlin.compiler.jvmTarget>${maven.compiler.source}</kotlin.compiler.jvmTarget>
-		<kotlin.coroutine.version>1.6.2</kotlin.coroutine.version>
+		<kotlin.coroutine.version>1.6.4</kotlin.coroutine.version>
 
 		<slf4j.version>1.7.36</slf4j.version>
 
